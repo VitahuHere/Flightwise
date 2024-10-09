@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 const App = () => {
     const [inputText, setInputText] = useState('');
@@ -23,9 +24,9 @@ const App = () => {
     };
 
     return (
-        <div className="app-container" style={{ padding: '20px' }}>
+        <div className="app-container">
             <h1>Translator</h1>
-            <div className="translator-box" style={{ display: 'flex', gap: '10px' }}>
+            <div className="translator-box">
                 <div style={{ width: '50%' }}>
                     <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)}>
                         <option value="en">English</option>
@@ -36,8 +37,6 @@ const App = () => {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Start typing to translate..."
-                        rows="5"
-                        style={{ width: '100%', padding: '10px' }}
                     />
                 </div>
                 <button onClick={translateText}>&rarr;</button>
@@ -47,7 +46,7 @@ const App = () => {
                         <option value="en">English</option>
                         {/* Add more languages as needed */}
                     </select>
-                    <div style={{ padding: '10px', border: '1px solid #ccc', minHeight: '120px' }}>
+                    <div className="translation-output">
                         {translatedText || 'Translation will appear here...'}
                     </div>
                 </div>
