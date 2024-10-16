@@ -24,7 +24,7 @@
   max-width: 800px; /* Max width to keep it responsive */
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1); /* Deeper shadow for rectangle */
 }
 
@@ -68,8 +68,21 @@ textarea {
   color: #888; /* Text color for empty translation */
 }
 
-/* Translate button */
-button {
+textarea, .translation-output {
+  margin-top: 10px; /* Same margin for both elements */
+}
+
+/* Column for buttons */
+.button-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+/* Swap button */
+.swap-btn, .translate-btn {
   background-color: #4CAF50; /* Green button */
   border: none;
   color: white;
@@ -78,11 +91,15 @@ button {
   padding: 10px 20px;
   border-radius: 50%; /* Make button round */
   transition: background-color 0.3s ease;
-  margin: 0 20px;
+  margin-bottom: 20px;
 }
 
-button:hover {
+.swap-btn:hover, .translate-btn:hover {
   background-color: #45a049;
+}
+
+.translate-btn {
+  margin-top: 10px;
 }
 
 /* Heading styling */
@@ -98,6 +115,7 @@ h1 {
   .translator-box {
     flex-direction: column;
     width: 90%;
+    align-items: center;
   }
 
   textarea, .translation-output {
@@ -108,5 +126,14 @@ h1 {
     font-size: 18px;
     padding: 10px;
     margin: 20px 0;
+  }
+
+  .button-column {
+    flex-direction: row;
+    margin: 10px 0;
+  }
+
+  .swap-btn, .translate-btn {
+    margin: 0 10px;
   }
 }

@@ -23,15 +23,21 @@ const App = () => {
         }
     };
 
+    const swapLanguages = () => {
+        const temp = sourceLang;
+        setSourceLang(targetLang);
+        setTargetLang(temp);
+    };
+
     return (
         <div className="app-container">
             <h1>Translator</h1>
             <div className="translator-box">
-                <div style={{ width: '50%' }}>
+                <div style={{ width: '45%' }}>
                     <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)}>
-                        <option value="en">English</option>
-                        <option value="vi">Vietnamese</option>
-                        {/* Add more languages as needed */}
+                        <option value="en" disabled={targetLang === 'en'}>English</option>
+                        <option value="vi" disabled={targetLang === 'vi'}>Vietnamese</option>
+                        <option value="pl" disabled={targetLang === 'pl'}>Polish</option>
                     </select>
                     <textarea
                         value={inputText}
@@ -39,12 +45,25 @@ const App = () => {
                         placeholder="Start typing to translate..."
                     />
                 </div>
-                <button onClick={translateText}>&rarr;</button>
-                <div style={{ width: '50%' }}>
+
+                {/* Column for the buttons */}
+                <div className="button-column">
+                    {/* Swap button */}
+                    <button onClick={swapLanguages} className="swap-btn">
+                        &#8646; {/* Swap icon */}
+                    </button>
+
+                    {/* Translate button */}
+                    <button onClick={translateText} className="translate-btn">
+                        &rarr;
+                    </button>
+                </div>
+
+                <div style={{ width: '45%' }}>
                     <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)}>
-                        <option value="vi">Vietnamese</option>
-                        <option value="en">English</option>
-                        {/* Add more languages as needed */}
+                        <option value="en" disabled={sourceLang === 'en'}>English</option>
+                        <option value="vi" disabled={sourceLang === 'vi'}>Vietnamese</option>
+                        <option value="pl" disabled={sourceLang === 'pl'}>Polish</option>
                     </select>
                     <div className="translation-output">
                         {translatedText || 'Translation will appear here...'}
