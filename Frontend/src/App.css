@@ -6,33 +6,33 @@
 }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
   background-color: #f4f6f9;
 }
 
 .container {
-  width: 80%;
-  max-width: 1200px;
-  border-radius: 12px;
-  background-color: #ffffff;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20px 30px;
+  width: 100vw; /* Full width of the viewport */
+  height: 100vh; /* Full height of the viewport */
+  padding: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
 
-.dropdown {
+.dropdown, .date-picker {
   flex: 1;
-  position: relative;
+  max-width: 250px; /* Fixed width for consistency */
 }
 
 label {
@@ -43,8 +43,7 @@ label {
   font-size: 0.85rem;
 }
 
-.react-select__control,
-input[type="text"] {
+.react-select__control, input[type="text"] {
   width: 100%;
   padding: 12px 14px;
   font-size: 0.95rem;
@@ -56,15 +55,10 @@ input[type="text"] {
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-input[type="text"]:focus,
-.react-select__control--is-focused {
+input[type="text"]:focus, .react-select__control--is-focused {
   border-color: #007bff;
   outline: none;
   box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.2);
-}
-
-input[type="text"] {
-  cursor: pointer;
 }
 
 .search-button {
@@ -77,6 +71,8 @@ input[type="text"] {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
+  flex-shrink: 0;
+  align-self: flex-end;
 }
 
 .search-button:hover {
@@ -86,7 +82,7 @@ input[type="text"] {
 .result-map-container {
   display: flex;
   gap: 20px;
-  margin-top: 20px;
+  flex: 1;
 }
 
 .prediction {
@@ -108,8 +104,8 @@ input[type="text"] {
 }
 
 .map {
-  flex: 1;
-  height: 300px;
+  flex: 2;
+  height: 100%;
   border-radius: 12px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -117,23 +113,45 @@ input[type="text"] {
 /* Calendar Styling */
 .calendar {
   position: absolute;
-  top: 150px; /* Adjust position based on layout */
+  top: 150px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000; /* Ensures it overlays other elements */
+  z-index: 1000;
   border-radius: 8px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.prediction {
+  flex: 1;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #f1f5f9;
+  font-size: 1.25rem;
+  color: #333;
+  border: 1px solid #ddd;
+  text-align: center;
+  overflow: hidden;
+}
 
-.container {
-  width: 150%;
-  max-width: 1500%;
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 16px;
+.flight-list {
+  max-height: calc(100vh - 270px); /* Adjust height to fit within the available space */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 10px;
+}
+
+.flight-item {
   background-color: #ffffff;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20px 30px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: box-shadow 0.2s ease;
+}
+
+.flight-item:hover {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.flight-item:last-child {
+  margin-bottom: 0;
 }

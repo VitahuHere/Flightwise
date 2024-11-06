@@ -7,6 +7,7 @@ import "react-date-range/dist/theme/default.css"; // Theme style
 import "leaflet/dist/leaflet.css";
 import "./App.css";
 
+// TO DELETE
 const locationOptions = [
     { value: "Delhi", label: "Delhi, India" },
     { value: "Mumbai", label: "Mumbai, India" },
@@ -43,9 +44,13 @@ function App() {
         });
     };
 
-    const updatePrice = () => {
-        setPrice(2137); // Placeholder for actual price logic
-    };
+    // TO DELETE
+    const exampleFlights = Array.from({ length: 10 }, (_, i) => ({
+        id: i + 1,
+        from: locationOptions[Math.floor(Math.random() * locationOptions.length)].label,
+        to: locationOptions[Math.floor(Math.random() * locationOptions.length)].label,
+        price: (Math.random() * 500 + 100).toFixed(2)
+    }));
 
     return (
         <div className="container">
@@ -92,7 +97,7 @@ function App() {
                         placeholder="Select return date"
                     />
                 </div>
-                <button className="search-button" onClick={updatePrice}>Search</button>
+                <button className="search-button">Search</button>
             </div>
 
             {showCalendar && (
@@ -107,10 +112,30 @@ function App() {
             )}
 
             <div className="result-map-container">
-                <div className="prediction">
-                    <h2>Predicted Flight Price</h2>
-                    <div id="price">PLN {price}</div>
-                </div>
+                {from && to ? ( // Only show predictions if both 'from' and 'to' are set
+                    <div className="prediction">
+                        <h2>Predicted Flight Prices</h2>
+                        <div className="flight-list">
+                            {exampleFlights.map((flight) => (
+                                <div key={flight.id} className="flight-item">
+                                    <p>
+                                        <strong>From:</strong> {flight.from}
+                                    </p>
+                                    <p>
+                                        <strong>To:</strong> {flight.to}
+                                    </p>
+                                    <p>
+                                        <strong>Price:</strong> PLN {flight.price}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="prediction">
+                        <h2>Please select both a departure and destination to see predictions</h2>
+                    </div>
+                )}
 
                 <MapContainer center={[52.2297, 21.0122]} zoom={4} className="map">
                     <TileLayer
