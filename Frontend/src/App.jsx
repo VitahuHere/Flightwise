@@ -37,7 +37,7 @@ function App() {
 
     const handleDateSelect = (ranges) => {
         setDateRange([ranges.selection]);
-        setShowCalendar(false); // Close calendar after selection
+        setShowCalendar(false);
     };
 
     const formatDate = (date) => {
