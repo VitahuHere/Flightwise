@@ -7,9 +7,10 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.10"
 pandas = "^2.2.3"
 scikit-learn = "^1.5.2"
+fastapi = "^0.115.5"
 
 
 [build-system]
