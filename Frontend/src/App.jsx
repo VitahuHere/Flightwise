@@ -73,19 +73,21 @@ function App() {
     // }
 
     const handlechangeTo = async () => {
-        const [lat, lon] = await getCoordinates(to.value);
+        const [city, country] = extractCityAndCountry(to.label)
+        const [lat, lon] = await getCoordinates(city, country);
         setToPositionLat(lat);
         setToPositionLon(lon);
     };
 
     const handlechangeFrom = async () => {
-        const [lat, lon] = await getCoordinates(from.value);
+        const [city, country] = extractCityAndCountry(from.label)
+        const [lat, lon] = await getCoordinates(city, country);
         setFromPositionLat(lat);
         setFromPositionLon(lon);
     };
 
-    const getCoordinates = async (cityName) => {
-        const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityName)}&format=json`;
+    const getCoordinates = async (cityName, countryName) => {
+        const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityName)}&country=${encodeURIComponent(countryName)}&format=json`;
 
         try {
             const response = await fetch(url);
@@ -104,6 +106,20 @@ function App() {
             console.error('Error fetching data:', error);
             return [null, null];  // Fallback to null on error
         }
+    };
+
+    const extractCityAndCountry = (label) => {
+        // Podziel label na miasto i państwo, używając przecinka jako separatora
+        const parts = label.split(", ");
+
+        if (parts.length === 2) {
+            const city = parts[0];  // Pierwsza część to miasto
+            const country = parts[1];  // Druga część to kraj
+            return [ city, country ];
+        }
+
+        // Jeśli label nie zawiera przecinka, zwróć null lub inny komunikat
+        return null;
     };
 
     useEffect(() => {
