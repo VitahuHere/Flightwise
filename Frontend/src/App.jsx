@@ -25,6 +25,8 @@ function App() {
     const [toPositionLon, setToPositionLon] = useState(null);
     const [fromPositionLat, setFromPositionLat] = useState(null);
     const [fromPositionLon, setFromPositionLon] = useState(null);
+    const [centerPositionLat, setCenterPositionLat] = useState(0);
+    const [centerPositionLon, setCenterPositionLon] = useState(0);
     const [dateRange, setDateRange] = useState([
         {
             startDate: new Date(),
@@ -72,19 +74,31 @@ function App() {
     //     }
     // }
 
-    const handlechangeTo = async () => {
-        const [city, country] = extractCityAndCountry(to.label)
-        const [lat, lon] = await getCoordinates(city, country);
-        setToPositionLat(lat);
-        setToPositionLon(lon);
-    };
+    const handleMap = async () => {
+        if (to.label) {
+            const [cityTo, countryTo] = extractCityAndCountry(to.label)
+            const [latTo, lonTo] = await getCoordinates(cityTo, countryTo);
+            setToPositionLat(latTo);
+            setToPositionLon(lonTo);
+        }
 
-    const handlechangeFrom = async () => {
-        const [city, country] = extractCityAndCountry(from.label)
-        const [lat, lon] = await getCoordinates(city, country);
-        setFromPositionLat(lat);
-        setFromPositionLon(lon);
-    };
+        if (from.label) {
+            const [cityFrom, countryFrom] = extractCityAndCountry(from.label)
+            const [latFrom, lonFrom] = await getCoordinates(cityFrom, countryFrom);
+            setFromPositionLat(latFrom);
+            setFromPositionLon(lonFrom);
+        }
+
+        if (toPositionLat && toPositionLon && fromPositionLon && fromPositionLat) {
+            const lat = (toPositionLat + fromPositionLat) / 2;
+            const lon = (toPositionLon + fromPositionLon) / 2;
+            console.log(lat);
+            console.log(lon);
+            setCenterPositionLat(lat);
+            setCenterPositionLon(lon);
+        }
+
+    }
 
     const getCoordinates = async (cityName, countryName) => {
         const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityName)}&country=${encodeURIComponent(countryName)}&format=json`;
@@ -109,23 +123,20 @@ function App() {
     };
 
     const extractCityAndCountry = (label) => {
-        // Podziel label na miasto i państwo, używając przecinka jako separatora
         const parts = label.split(", ");
 
         if (parts.length === 2) {
-            const city = parts[0];  // Pierwsza część to miasto
-            const country = parts[1];  // Druga część to kraj
+            const city = parts[0];
+            const country = parts[1];
             return [ city, country ];
         }
 
-        // Jeśli label nie zawiera przecinka, zwróć null lub inny komunikat
         return null;
     };
 
     useEffect(() => {
         //generateLocationOptionsHtml();
-        handlechangeTo();
-        handlechangeFrom();
+        handleMap();
     }, [setFrom, setTo, from, to]);
 
     // TO DELETE
@@ -221,7 +232,9 @@ function App() {
                     </div>
                 )}
 
-                <MapContainer center={[52.2297, 21.0122]} zoom={4} className="map">
+                <MapContainer center={ fromPositionLat && fromPositionLon && toPositionLat && toPositionLon ? [((toPositionLat + fromPositionLat) / 2),((toPositionLon + fromPositionLon) / 2)] :
+                    [52.2297, 21.0122]
+                } zoom={4} className="map">
                     <TileLayer
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -232,7 +245,7 @@ function App() {
                             <Popup>Starting Point</Popup>
                         </Marker>
                     ) : (
-                        <Marker position={[52.2297, 21.0122]}> {/* Default to Warsaw if invalid */}
+                        <Marker position={[52.2297, 21.0122]}>
                             <Popup>Starting Point (Default)</Popup>
                         </Marker>
                     )}
@@ -243,7 +256,7 @@ function App() {
                             <Popup>Destination</Popup>
                         </Marker>
                     ) : (
-                        <Marker position={[52.2297, 21.0122]}> {/* Default to Warsaw if invalid */}
+                        <Marker position={[52.2297, 21.0122]}>
                             <Popup>Destination (Default)</Popup>
                         </Marker>
                     )}
