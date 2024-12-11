@@ -1,15 +1,22 @@
-import fastapi
+import joblib
+
 from enum import Enum
-from pydantic import BaseModel, conint
+
+import fastapi
+import numpy as np
+from fastapi import FastAPI
+from pydantic import BaseModel
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
 
 
 class SupportedCities(Enum):
-     DELHI = 'Delhi'
-     MUMBAI = 'Mumbai'
-     BANGALORE = 'Bangalore'
-     KOLKATA = 'Kolkata'
-     HYDERABAD = 'Hyderabad'
-     CHENNAI = 'Chennai'
+    DELHI = 'Delhi'
+    MUMBAI = 'Mumbai'
+    BANGALORE = 'Bangalore'
+    KOLKATA = 'Kolkata'
+    HYDERABAD = 'Hyderabad'
+    CHENNAI = 'Chennai'
 
 
 class TimeOfDayBucket(Enum):
@@ -27,3 +34,16 @@ class PredictionInput(BaseModel):
     is_direct: bool
     arrival_time: TimeOfDayBucket
     destination_city: SupportedCities
+
+
+app = FastAPI()
+
+
+@app.post("/predict")
+def predict():
+    model: RandomForestRegressor = joblib.load("random_forest.pkl")
+    scaler: StandardScaler = joblib.load("scaler.pkl")
+    x = np.array([True, 130, 1, False, False, True, False, False, False, False, False, True, False, False, False, False,
+         False, False, False, False, True, False, False, False, False, False, True
+         ]).reshape(1, -1)
+    return scaler.inverse_transform(model.predict(x).reshape(1, -1))
