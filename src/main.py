@@ -31,8 +31,8 @@ class PredictionInput(BaseModel):
     source_city: SupportedCities
     departure_time: TimeOfDayBucket
     is_direct: bool
-    duration: int
-    days_left: int
+    duration: float
+    days_left: float
     arrival_time: TimeOfDayBucket
     destination_city: SupportedCities
 
@@ -57,8 +57,7 @@ pred_table = {
        'destination_city_Kolkata': False,'destination_city_Mumbai': False,
 }
 
-
-@app.post("/predict/")
+@app.post("/predict")
 def predict(data: PredictionInput):
     source_city_key = f"source_city_{data.source_city.value}"
     destination_city_key = f"destination_city_{data.destination_city.value}"
@@ -75,11 +74,10 @@ def predict(data: PredictionInput):
     ready_data[departure_time_key] = True
     ready_data[destination_city_key] = True
     ready_data[source_city_key] = True
-    ready_data[destination_city_key] = True
 
-    # print(ready_data)
+    model: RandomForestRegressor = joblib.load("src/random_forest.pkl")
+    scaler: StandardScaler = joblib.load("src/scaler.pkl")
+    x = np.array(list(ready_data.values())).reshape(1, -1)
 
-    # model: RandomForestRegressor = joblib.load("random_forest.pkl")
-    # scaler: StandardScaler = joblib.load("scaler.pkl")
-    return ready_data
-    # return scaler.inverse_transform(model.predict(x).reshape(1,-1))
+    prediction = model.predict(x).reshape(1,-1)
+    return {"predicted_price": (scaler.inverse_transform(prediction)[0][0])}
