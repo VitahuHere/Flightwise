@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 
 class SupportedCities(Enum):
@@ -30,6 +31,8 @@ class PredictionInput(BaseModel):
     source_city: SupportedCities
     departure_time: TimeOfDayBucket
     is_direct: bool
+    duration: int
+    days_left: int
     arrival_time: TimeOfDayBucket
     destination_city: SupportedCities
 
@@ -55,11 +58,28 @@ pred_table = {
 }
 
 
-@app.post("/predict")
+@app.post("/predict/")
 def predict(data: PredictionInput):
-    departure_city = f"source_city_{data.source_city}"
-    arrival_city = f"destination_city_{data.destination_city}"
+    source_city_key = f"source_city_{data.source_city.value}"
+    destination_city_key = f"destination_city_{data.destination_city.value}"
 
-    model: RandomForestRegressor = joblib.load("random_forest.pkl")
-    scaler: StandardScaler = joblib.load("scaler.pkl")
-    return scaler.inverse_transform(model.predict(x).reshape(1,-1))
+    arrival_time_key = f"arrival_time_{data.arrival_time.value}"
+    departure_time_key = f"departure_time_{data.departure_time.value}"
+
+    ready_data = pred_table
+    ready_data["is_direct"] = data.is_direct
+    ready_data["duration"] = data.duration
+    ready_data["days_left"] = data.days_left
+
+    ready_data[arrival_time_key] = True
+    ready_data[departure_time_key] = True
+    ready_data[destination_city_key] = True
+    ready_data[source_city_key] = True
+    ready_data[destination_city_key] = True
+
+    # print(ready_data)
+
+    # model: RandomForestRegressor = joblib.load("random_forest.pkl")
+    # scaler: StandardScaler = joblib.load("scaler.pkl")
+    return ready_data
+    # return scaler.inverse_transform(model.predict(x).reshape(1,-1))
