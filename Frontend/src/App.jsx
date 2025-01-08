@@ -18,15 +18,14 @@ const locationOptions = [
 ];
 
 function App() {
-    const [price, setPrice] = useState(2137);
-    const [from, setFrom] = useState("Warsaw");
-    const [to, setTo] = useState("Berlin");
+    const [flights, setFlights] = useState([]);
+    const [from, setFrom] = useState(null);
+    const [to, setTo] = useState(null);
     const [toPositionLat, setToPositionLat] = useState(null);
     const [toPositionLon, setToPositionLon] = useState(null);
     const [fromPositionLat, setFromPositionLat] = useState(null);
     const [fromPositionLon, setFromPositionLon] = useState(null);
-    const [centerPositionLat, setCenterPositionLat] = useState(0);
-    const [centerPositionLon, setCenterPositionLon] = useState(0);
+    const [centerSet, setCenterSet] = useState(false);
     const [dateRange, setDateRange] = useState([
         {
             startDate: new Date(),
@@ -35,6 +34,7 @@ function App() {
         }
     ]);
     const [showCalendar, setShowCalendar] = useState(false);
+    const [handlePost, setHandlePost] = useState(false);
 
 
     const handleDateSelect = (ranges) => {
@@ -51,28 +51,56 @@ function App() {
         });
     };
 
-    // const feachCitysData = async () => {
-    //     const response = await fetch(
-    //         `http://localhost:5230/api/citys`,
-    //         {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //         }
-    //     );
-    //
-    //     return await response.json();
-    // }
+    const feachPredictData = async () => {
+        const durationInMillis = dateRange[0].endDate - dateRange[0].startDate;
+        const durationInDays = Math.floor(durationInMillis / (1000 * 60 * 60 * 24));
 
-    // const generateLocationOptionsHtml = async () => {
-    //     try {
-    //         const locationOptionsData = await feachCitysData();
-    //         setLocationOptions(locationOptionsData);
-    //     } catch (e) {
-    //         console.error(e);
-    //     }
-    // }
+        const daysLeftInMillis = new Date() - dateRange[0].startDate;
+        const daysLeft = Math.floor(daysLeftInMillis / (1000 * 60 * 60 * 24));
+        const dataToSend = {
+            source_city: from.value,
+            departure_time: 'Morning',
+            is_direct: true,
+            duration: durationInDays,
+            days_left: daysLeft,
+            arrival_time: 'Morning',
+            destination_city: to.value
+        }
+
+        const response = await fetch(
+            `http://localhost:5230/api/predict`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend),
+            }
+        );
+        const toReturn = await response.json();
+        return toReturn;
+    }
+
+    const generatePredictDataHtml = async () => {
+        try {
+            const priceData = await feachPredictData();
+            const flight = {
+                id: flights.length + 1,
+                from: from.value,
+                to: to.value,
+                price: priceData
+            }
+            setFlights(prevFlights => [...prevFlights, flight]); // Add new flight to the list
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    useEffect(() => {
+        if ((from && to) && (from != to)) {
+            generatePredictDataHtml();
+        }
+    }, [handlePost]);
 
     const handleMap = async () => {
         if (to.label) {
@@ -88,16 +116,6 @@ function App() {
             setFromPositionLat(latFrom);
             setFromPositionLon(lonFrom);
         }
-
-        if (toPositionLat && toPositionLon && fromPositionLon && fromPositionLat) {
-            const lat = (toPositionLat + fromPositionLat) / 2;
-            const lon = (toPositionLon + fromPositionLon) / 2;
-            console.log(lat);
-            console.log(lon);
-            setCenterPositionLat(lat);
-            setCenterPositionLon(lon);
-        }
-
     }
 
     const getCoordinates = async (cityName, countryName) => {
@@ -135,17 +153,10 @@ function App() {
     };
 
     useEffect(() => {
-        //generateLocationOptionsHtml();
-        handleMap();
-    }, [setFrom, setTo, from, to]);
-
-    // TO DELETE
-    const exampleFlights = Array.from({ length: 10 }, (_, i) => ({
-        id: i + 1,
-        from: locationOptions[Math.floor(Math.random() * locationOptions.length)].label,
-        to: locationOptions[Math.floor(Math.random() * locationOptions.length)].label,
-        price: (Math.random() * 500 + 100).toFixed(2)
-    }));
+        if (from && to) {
+            handleMap();
+        }
+    }, [from, to]);
 
     return (
         <div className="container">
@@ -192,7 +203,7 @@ function App() {
                         placeholder="Select return date"
                     />
                 </div>
-                <button className="search-button">Search</button>
+                <button className="search-button" onClick={() => setHandlePost(!handlePost)}>Search</button>
             </div>
 
             {showCalendar && (
@@ -207,11 +218,11 @@ function App() {
             )}
 
             <div className="result-map-container">
-                {from && to ? ( // Only show predictions if both 'from' and 'to' are set
+                {from && to ? (
                     <div className="prediction">
                         <h2>Predicted Flight Prices</h2>
                         <div className="flight-list">
-                            {exampleFlights.map((flight) => (
+                            {flights.map((flight) => (
                                 <div key={flight.id} className="flight-item">
                                     <p>
                                         <strong>From:</strong> {flight.from}
@@ -232,9 +243,10 @@ function App() {
                     </div>
                 )}
 
-                <MapContainer center={ fromPositionLat && fromPositionLon && toPositionLat && toPositionLon ? [((toPositionLat + fromPositionLat) / 2),((toPositionLon + fromPositionLon) / 2)] :
-                    [52.2297, 21.0122]
-                } zoom={4} className="map">
+                <MapContainer
+                    center={[21.0859, 79.0450]}
+                    zoom={4}
+                    className="map">
                     <TileLayer
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
