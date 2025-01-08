@@ -22,10 +22,18 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install pipx
+        run: python3 -m pip install --upgrade pipx
+
       - name: Install poetry
         uses: abatilo/actions-poetry@v4.0.0
         with:
           poetry-version: '2.0.0'
+
+      - name: Setup a local virtual environment (if no poetry.toml file)
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
 
       - name: Install dependencies
         run: poetry install
