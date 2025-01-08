@@ -23,7 +23,7 @@ def remove_outliers(df, column):
     return df[(df[column] > lower_bound) & (df[column] < upper_bound)].copy(deep=True)
 
 
-data = pd.read_csv('Clean_Dataset.csv', index_col=0)
+data = pd.read_csv('src/Clean_Dataset.csv', index_col=0)
 economy = data[data['class'] != 'Business'].copy(deep=True)
 economy['stops'] = economy['stops'].apply(map_stops)
 
