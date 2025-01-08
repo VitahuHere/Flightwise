@@ -39,7 +39,6 @@ class PredictionInput(BaseModel):
 
 app = FastAPI()
 
-# test
 pred_table = {
     'is_direct': False,
     'duration': 0,
