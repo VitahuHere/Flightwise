@@ -74,8 +74,8 @@ def predict(data: PredictionInput):
     ready_data[destination_city_key] = True
     ready_data[source_city_key] = True
 
-    model: RandomForestRegressor = joblib.load("src/random_forest.pkl")
-    scaler: StandardScaler = joblib.load("src/scaler.pkl")
+    model: RandomForestRegressor = joblib.load("random_forest.pkl")
+    scaler: StandardScaler = joblib.load("scaler.pkl")
     x = np.array(list(ready_data.values())).reshape(1, -1)
 
     prediction = model.predict(x).reshape(1,-1)
