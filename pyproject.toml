@@ -10,9 +10,6 @@ package-mode = false
 python = ">=3.10"
 scikit-learn = "^1.5.2"
 fastapi = {extras = ["standard"], version = "^0.115.6"}
-
-
-[tool.poetry.group.dev.dependencies]
 notebook = "^7.3.2"
 pandas = "^2.2.3"
 
