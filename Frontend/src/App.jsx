@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { DateRangePicker } from "react-date-range";
@@ -17,6 +17,15 @@ const locationOptions = [
     { value: "Chennai", label: "Chennai, India" }
 ];
 
+const timeOfDayBucket = [
+    'Evening',
+    'Early_Morning',
+    'Morning',
+    'Afternoon',
+    'Night',
+    'Late_Night'
+];
+
 function App() {
     const [flights, setFlights] = useState([]);
     const [from, setFrom] = useState(null);
@@ -25,7 +34,6 @@ function App() {
     const [toPositionLon, setToPositionLon] = useState(null);
     const [fromPositionLat, setFromPositionLat] = useState(null);
     const [fromPositionLon, setFromPositionLon] = useState(null);
-    const [centerSet, setCenterSet] = useState(false);
     const [dateRange, setDateRange] = useState([
         {
             startDate: new Date(),
@@ -35,7 +43,9 @@ function App() {
     ]);
     const [showCalendar, setShowCalendar] = useState(false);
     const [handlePost, setHandlePost] = useState(false);
-
+    const [showPredict, setShowPredict] = useState(false);
+    const [departureTime, setDepartureTime] = useState(null);
+    const [arrivalTime, setArrivalTime] = useState(null);
 
     const handleDateSelect = (ranges) => {
         setDateRange([ranges.selection]);
@@ -59,16 +69,16 @@ function App() {
         const daysLeft = Math.floor(daysLeftInMillis / (1000 * 60 * 60 * 24));
         const dataToSend = {
             source_city: from.value,
-            departure_time: 'Morning',
+            departure_time: departureTime,
             is_direct: true,
             duration: durationInDays,
             days_left: daysLeft,
-            arrival_time: 'Morning',
+            arrival_time: arrivalTime,
             destination_city: to.value
-        }
+        };
 
         const response = await fetch(
-            `http://localhost:5230/api/predict`,
+            `http://localhost:8000/api/predict`,
             {
                 method: 'POST',
                 headers: {
@@ -79,7 +89,7 @@ function App() {
         );
         const toReturn = await response.json();
         return toReturn;
-    }
+    };
 
     const generatePredictDataHtml = async () => {
         try {
@@ -89,34 +99,35 @@ function App() {
                 from: from.value,
                 to: to.value,
                 price: priceData
-            }
-            setFlights(prevFlights => [...prevFlights, flight]); // Add new flight to the list
+            };
+            setFlights(prevFlights => [...prevFlights, flight]);
+            setShowPredict(true);
         } catch (e) {
             console.error(e);
         }
-    }
+    };
 
     useEffect(() => {
-        if ((from && to) && (from != to)) {
+        if ((from && to) && (from !== to)) {
             generatePredictDataHtml();
         }
     }, [handlePost]);
 
     const handleMap = async () => {
         if (to.label) {
-            const [cityTo, countryTo] = extractCityAndCountry(to.label)
+            const [cityTo, countryTo] = extractCityAndCountry(to.label);
             const [latTo, lonTo] = await getCoordinates(cityTo, countryTo);
             setToPositionLat(latTo);
             setToPositionLon(lonTo);
         }
 
         if (from.label) {
-            const [cityFrom, countryFrom] = extractCityAndCountry(from.label)
+            const [cityFrom, countryFrom] = extractCityAndCountry(from.label);
             const [latFrom, lonFrom] = await getCoordinates(cityFrom, countryFrom);
             setFromPositionLat(latFrom);
             setFromPositionLon(lonFrom);
         }
-    }
+    };
 
     const getCoordinates = async (cityName, countryName) => {
         const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityName)}&country=${encodeURIComponent(countryName)}&format=json`;
@@ -146,7 +157,7 @@ function App() {
         if (parts.length === 2) {
             const city = parts[0];
             const country = parts[1];
-            return [ city, country ];
+            return [city, country];
         }
 
         return null;
@@ -171,6 +182,7 @@ function App() {
                         placeholder="Type to search..."
                     />
                 </div>
+
                 <div className="dropdown">
                     <label htmlFor="to">To</label>
                     <Select
@@ -181,6 +193,7 @@ function App() {
                         placeholder="Type to search..."
                     />
                 </div>
+
                 <div className="dropdown">
                     <label htmlFor="departure-date">Departure Date</label>
                     <input
@@ -192,6 +205,18 @@ function App() {
                         placeholder="Select departure date"
                     />
                 </div>
+
+                <div className="dropdown">
+                    <label htmlFor="departure-time">Departure Time</label>
+                    <Select
+                        id="departure-time"
+                        options={timeOfDayBucket.map(time => ({value: time, label: time}))}
+                        value={departureTime ? {value: departureTime, label: departureTime} : null}
+                        onChange={(selected) => setDepartureTime(selected.value)}
+                        placeholder="Select departure time"
+                    />
+                </div>
+
                 <div className="dropdown">
                     <label htmlFor="return-date">Return Date</label>
                     <input
@@ -203,6 +228,18 @@ function App() {
                         placeholder="Select return date"
                     />
                 </div>
+
+                <div className="dropdown">
+                    <label htmlFor="arrival-time">Arrival Time</label>
+                    <Select
+                        id="arrival-time"
+                        options={timeOfDayBucket.map(time => ({value: time, label: time}))}
+                        value={arrivalTime ? {value: arrivalTime, label: arrivalTime} : null}
+                        onChange={(selected) => setArrivalTime(selected.value)}
+                        placeholder="Select arrival time"
+                    />
+                </div>
+
                 <button className="search-button" onClick={() => setHandlePost(!handlePost)}>Search</button>
             </div>
 
@@ -218,7 +255,7 @@ function App() {
             )}
 
             <div className="result-map-container">
-                {from && to ? (
+                {showPredict ? (
                     <div className="prediction">
                         <h2>Predicted Flight Prices</h2>
                         <div className="flight-list">
@@ -251,7 +288,6 @@ function App() {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
-                    {/* From marker */}
                     {fromPositionLat && fromPositionLon ? (
                         <Marker position={[fromPositionLat, fromPositionLon]}>
                             <Popup>Starting Point</Popup>
@@ -262,7 +298,6 @@ function App() {
                         </Marker>
                     )}
 
-                    {/* To marker */}
                     {toPositionLat && toPositionLon ? (
                         <Marker position={[toPositionLat, toPositionLon]}>
                             <Popup>Destination</Popup>
