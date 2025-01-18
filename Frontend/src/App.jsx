@@ -6,8 +6,9 @@ import "react-date-range/dist/styles.css"; // Main style
 import "react-date-range/dist/theme/default.css"; // Theme style
 import "leaflet/dist/leaflet.css";
 import "./App.css";
+import Footer from "./Footer.jsx";
 
-// TO DELETE
+
 const locationOptions = [
     { value: "Delhi", label: "Delhi, India" },
     { value: "Mumbai", label: "Mumbai, India" },
@@ -71,14 +72,16 @@ function App() {
             source_city: from.value,
             departure_time: departureTime,
             is_direct: true,
+            airline: "Air_India",
             duration: durationInDays,
             days_left: daysLeft,
             arrival_time: arrivalTime,
+            stops: "one",
             destination_city: to.value
         };
-
+        console.log(dataToSend);
         const response = await fetch(
-            `http://localhost:8000/api/predict`,
+            `https://flightwise-c4bhbcfvcyc6awdm.polandcentral-01.azurewebsites.net/predict`,
             {
                 method: 'POST',
                 headers: {
@@ -98,7 +101,7 @@ function App() {
                 id: flights.length + 1,
                 from: from.value,
                 to: to.value,
-                price: priceData
+                price: priceData.predicted_price
             };
             setFlights(prevFlights => [...prevFlights, flight]);
             setShowPredict(true);
@@ -309,6 +312,7 @@ function App() {
                     )}
                 </MapContainer>
             </div>
+            <Footer />
         </div>
     );
 }
