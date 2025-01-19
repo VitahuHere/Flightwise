@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class SupportedCities(Enum):
@@ -38,23 +39,33 @@ class PredictionInput(BaseModel):
 
 
 app = FastAPI()
-
+origins = [
+    "*",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 pred_table = {
     'is_direct': False,
     'duration': 0,
     'days_left': 0,
     'source_city_Bangalore': False,
-    'source_city_Chennai': False,'source_city_Delhi': False,'source_city_Hyderabad': False,
-       'source_city_Kolkata': False,'source_city_Mumbai': False,'departure_time_Afternoon': False,
-       'departure_time_Early_Morning': False,'departure_time_Evening': False,
-       'departure_time_Late_Night': False,'departure_time_Morning': False,
-       'departure_time_Night': False,'arrival_time_Afternoon': False,
-       'arrival_time_Early_Morning': False,'arrival_time_Evening': False,
-       'arrival_time_Late_Night': False,'arrival_time_Morning': False,'arrival_time_Night': False,
-       'destination_city_Bangalore': False,'destination_city_Chennai': False,
-       'destination_city_Delhi': False,'destination_city_Hyderabad': False,
-       'destination_city_Kolkata': False,'destination_city_Mumbai': False,
+    'source_city_Chennai': False, 'source_city_Delhi': False, 'source_city_Hyderabad': False,
+    'source_city_Kolkata': False, 'source_city_Mumbai': False, 'departure_time_Afternoon': False,
+    'departure_time_Early_Morning': False, 'departure_time_Evening': False,
+    'departure_time_Late_Night': False, 'departure_time_Morning': False,
+    'departure_time_Night': False, 'arrival_time_Afternoon': False,
+    'arrival_time_Early_Morning': False, 'arrival_time_Evening': False,
+    'arrival_time_Late_Night': False, 'arrival_time_Morning': False, 'arrival_time_Night': False,
+    'destination_city_Bangalore': False, 'destination_city_Chennai': False,
+    'destination_city_Delhi': False, 'destination_city_Hyderabad': False,
+    'destination_city_Kolkata': False, 'destination_city_Mumbai': False,
 }
+
 
 @app.post("/predict")
 def predict(data: PredictionInput):
@@ -78,5 +89,5 @@ def predict(data: PredictionInput):
     scaler: StandardScaler = joblib.load("scaler.pkl")
     x = np.array(list(ready_data.values())).reshape(1, -1)
 
-    prediction = model.predict(x).reshape(1,-1)
-    return {"predicted_price": (scaler.inverse_transform(prediction)[0][0])}
+    prediction = model.predict(x).reshape(1, -1)
+    return {"predicted_price": (scaler.inverse_transform(prediction)[0][0] * 0.048)}
